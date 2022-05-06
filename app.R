@@ -2,7 +2,6 @@ library(shiny)
 library(tidyverse)
 library(lubridate)
 library(chron)
-devtools::install_github("richfitz/remoji")
 library(remoji)
 
 
