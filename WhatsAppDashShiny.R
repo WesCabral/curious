@@ -10,14 +10,14 @@ library(remoji)
 ui <- fluidPage(
 
     # Application title
-    titlePanel("WhatsApp Dashboard"),
+    titlePanel("WhatsApp Dashboard v1.0"),
 
     # Sidebar with a slider input for number of bins 
     fluidRow(
         column(1),
         
         column(4, 
-               fileInput(inputId = "file", "Submeta um arquivo de conversa", accept = ".txt",8)),
+               fileInput(inputId = "file", "Submeta um arquivo de conversa (apenas android)", accept = ".txt",8)),
         column(3,
                plotOutput("distPlot")),
         column(3,
