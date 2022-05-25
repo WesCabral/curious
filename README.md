@@ -4,6 +4,10 @@ This is my WhatsApp dashboard in Shiny. I'm still working on it, but it's usable
 Enjoy!
 
 Analysis:
-Top talkers
-Top emojis
-Weekly heatmap
+
+- Top talkers
+
+- Top emojis
+
+- Weekly heatmap
+
