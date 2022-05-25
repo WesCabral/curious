@@ -1,4 +1,9 @@
 Hi there!
 
-In this repo I'm going to keep my R, Python, whatever, code. 
-Most of them related to data science, because I want to show people what I can do. But there will be only analysis that I really liked about subjects that I sincerelly appreciate.
+This is my WhatsApp dashboard in Shiny. I'm still working on it, but it's usable and can give you some insights of how your conversation is going.
+Enjoy!
+
+Analysis:
+Top talkers
+Top emojis
+Weekly heatmap
