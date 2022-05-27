@@ -16,7 +16,10 @@ ui <- fluidPage(
         column(1),
         
         column(4, 
-               fileInput(inputId = "file", "Submeta um arquivo de conversa (apenas android)", accept = ".txt",8)),
+               fileInput(inputId = "file", "Submeta um arquivo de conversa (apenas android)", accept = ".txt",8), 
+               dateRangeInput(inputId = "date", "Filtre por datas", format = "dd-mm-yyyy", separator = "até"),
+               numericInput(inputId = "top", "Número de colunas nos gráficos", 10), 
+               actionButton(inputId = "submit", "Aplicar")),
         column(3,
                plotOutput("distPlot")),
         column(3,
@@ -31,8 +34,8 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     
-    cleandata <- reactive({
-        
+    observeEvent(input$submit, { 
+    
         file = input$file
         file = read_tsv(file$datapath, skip = 1, col_names = "column")
         
@@ -57,21 +60,22 @@ server <- function(input, output) {
         
         file = mutate(file, horadec = floor(hour(data) + minute(data)/60))
         
-    })
+        file = filter(file, data >= format(input$date[1]) & data <= format(input$date[2]))
+        
     
     output$distPlot <- renderPlot({
         
         #Gráfico1
         
-        drop_na(cleandata()) %>%
+        drop_na(file) %>%
             group_by(autor) %>%
             summarise(n = n()) %>%
             arrange(desc(n)) %>%
-            top_n(wt = n, 10) %>%
+            top_n(wt = n, input$top) %>%
             ggplot(aes(x=reorder(autor,n), y = n, fill = autor)) +
                 geom_bar(stat = 'identity') +
                 geom_label(aes(label=n), hjust=1.5) +
-                labs(title = "Mensagens por usuário", x= NULL, y = NULL) +
+                labs(title = paste("Top", input$top, "maiores faladores"), x= NULL, y = NULL) +
                 coord_flip() +
                 theme_minimal() +
                 theme(legend.position = "none", axis.text=element_text(size=12),
@@ -84,7 +88,7 @@ server <- function(input, output) {
         
         #Gráfico2
         
-        cleandata() %>%
+       file %>%
             count(diasemana, horadec, name = 'count')  %>%
             drop_na() %>%
             complete(diasemana, horadec = seq(min(horadec), max(horadec)), fill = list(count = 0)) %>%
@@ -111,7 +115,7 @@ server <- function(input, output) {
         
         for (i in 1:length(emj)){
             emjcount[i,1] = emj[i]
-            emjcount[i,2] = length(unlist(str_extract_all(cleandata()$mensagem, emj[i])))
+            emjcount[i,2] = length(unlist(str_extract_all(file$mensagem, emj[i])))
         }
         
         names(emjcount) = c("Emoji", "Contagem")
@@ -120,20 +124,20 @@ server <- function(input, output) {
             filter(Contagem != 0) %>%
             group_by(Emoji) %>%
             summarise(Contagem = sum(Contagem)) %>%
-            slice_max(Contagem, n = 5) %>%
+            top_n(wt = Contagem, input$top) %>%
             left_join(emjname, by = "Emoji") %>%
             group_by(Emoji, Contagem) %>%
             summarise(Nome = first(Nome)) %>%
             ggplot(aes(x=reorder(Emoji,Contagem), y=Contagem)) +
             geom_bar(aes(fill=Emoji),stat="identity") +
             geom_label(aes(label=Contagem, fill=Emoji), hjust=1.5) +
-            labs(title = "Top 5 emojis mais usados", x= NULL, y = NULL) +
+            labs(title = paste("Top", input$top, "emojis mais usados"), x= NULL, y = NULL) +
             coord_flip() +
             theme_minimal() +
             theme(legend.position = "none", axis.text=element_text(size=12),
                   title=element_text(size=14), axis.text.y = element_text(size=25))
         
-        
+    })
     })
 }
 
