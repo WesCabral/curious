@@ -18,7 +18,7 @@ ui <- fluidPage(
         column(4, 
                fileInput(inputId = "file", "Submeta um arquivo de conversa (apenas android)", accept = ".txt",8), 
                dateRangeInput(inputId = "date", "Filtre por datas", format = "dd-mm-yyyy", separator = "até"),
-               numericInput(inputId = "top", "Número de colunas nos gráficos", 10), 
+               numericInput(inputId = "top", "Itens nos gráficos de 'Top'", 10), 
                actionButton(inputId = "submit", "Aplicar")),
         column(3,
                plotOutput("distPlot")),
@@ -71,11 +71,11 @@ server <- function(input, output) {
             group_by(autor) %>%
             summarise(n = n()) %>%
             arrange(desc(n)) %>%
-            top_n(wt = n, input$top) %>%
+            slice(1:input$top) %>%
             ggplot(aes(x=reorder(autor,n), y = n, fill = autor)) +
                 geom_bar(stat = 'identity') +
                 geom_label(aes(label=n), hjust=1.5) +
-                labs(title = paste("Top", input$top, "maiores faladores"), x= NULL, y = NULL) +
+                labs(title = paste("Top", input$top, "faladores"), x= NULL, y = NULL) +
                 coord_flip() +
                 theme_minimal() +
                 theme(legend.position = "none", axis.text=element_text(size=12),
@@ -124,20 +124,22 @@ server <- function(input, output) {
             filter(Contagem != 0) %>%
             group_by(Emoji) %>%
             summarise(Contagem = sum(Contagem)) %>%
-            top_n(wt = Contagem, input$top) %>%
+            arrange(desc(Contagem)) %>%
+            slice(1:input$top) %>%
             left_join(emjname, by = "Emoji") %>%
             group_by(Emoji, Contagem) %>%
             summarise(Nome = first(Nome)) %>%
             ggplot(aes(x=reorder(Emoji,Contagem), y=Contagem)) +
             geom_bar(aes(fill=Emoji),stat="identity") +
             geom_label(aes(label=Contagem, fill=Emoji), hjust=1.5) +
-            labs(title = paste("Top", input$top, "emojis mais usados"), x= NULL, y = NULL) +
+            labs(title = paste("Top", input$top, "emojis"), x= NULL, y = NULL) +
             coord_flip() +
             theme_minimal() +
             theme(legend.position = "none", axis.text=element_text(size=12),
                   title=element_text(size=14), axis.text.y = element_text(size=25))
         
-    })
+        })
+    
     })
 }
 
